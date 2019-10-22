@@ -1,0 +1,31 @@
+all:
+  vars:
+    ansible_user: ubuntu
+    become: true
+    #become: yes
+#  hosts:
+#    controller-1:
+#    controller-2:
+#    controller-3:
+#    compute-1:
+#    compute-2:
+#    compute-3:
+  children:
+    controller:
+      hosts:
+        controller-1:
+        controller-2:
+        controller-3:
+    compute:
+      hosts:
+        compute-1:
+        compute-2:
+        compute-3:
+    build_node:
+      hosts:
+        127.0.0.1:
+      vars:
+        ansible_user: phchoi
+        become: true
+        become_user: phchoi
+        become_method: sudo

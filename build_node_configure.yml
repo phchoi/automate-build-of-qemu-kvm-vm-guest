@@ -1,0 +1,64 @@
+- hosts: build_node
+  become: true
+  tasks:
+  - name: install libvirt and misc packages
+    dnf:
+      name:
+        - virt-manager
+        - virt-install
+        - libguestfs-tools
+        - python2-netaddr
+        - python3-netaddr
+        - NetworkManager-libnm
+        - NetworkManager-libnm-devel
+        - nm-connection-editor
+        - libsemanage-python
+        - python2-gobject
+        - python3-gobject
+        - python2-libvirt
+        - python3-libvirt
+        - policycoreutils-python
+      state: latest
+
+  - name: add user to libvirt group
+    user: name={{ item }}
+        groups={{ libvirt_group }}
+        append=yes
+    with_items: "{{ user_to_add_to_libvirt_group }}"
+
+#  Ideally should have used nmcli to create the br0 and configure the nic, but somehow ansible nmcli module failed in Fedora 29, due to removal of NetworkManager-glib
+
+  - name: create bridge interface for VM connection
+    template:
+      src: templates/build_node_br0.j2
+      dest: /etc/sysconfig/network-scripts/ifcfg-br0
+    vars:
+      bridge: "{{ build_node.br0 }}"
+    notify:
+      - restart NetworkManager
+
+  - name: change interface bootproto to none
+    lineinfile:
+      dest: "/etc/sysconfig/network-scripts/ifcfg-{{ build_node.nic_to_bind_to_br0 }}" 
+      regexp: '^BOOTPROTO'
+      line: BOOTPROTO=none
+    notify:
+      - restart NetworkManager
+
+  - name: bind interface to bridge
+    lineinfile:
+      dest: "/etc/sysconfig/network-scripts/ifcfg-{{ build_node.nic_to_bind_to_br0 }}" 
+      line: BRIDGE=br0
+    notify:
+      - restart NetworkManager
+
+  - name: disable firewalld
+    # I am just lazy here, usually you may want to do something like configuring
+    # rules like below to allow the bridge traffic to get through
+    # iptables -I FORWARD -m physdev --physdev-is-bridged -j ACCEPT
+    # however as my workstation is at home behind a router so i dont really care
+    systemd:
+      name: firewalld
+      state: stopped
+      enabled: no
+  

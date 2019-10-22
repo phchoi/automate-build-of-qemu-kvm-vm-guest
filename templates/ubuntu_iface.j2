@@ -1,0 +1,12 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ens3:
+      dhcp4: no
+{% set ipv4_host = item.ip | ipv4('host/prefix') %}
+      addresses:
+        - {{ item.ip }}
+      gateway4: {{ ipv4_host | ipaddr('1') | ipaddr('address') }}
+      nameservers:
+          addresses: [8.8.8.8, 1.1.1.1]

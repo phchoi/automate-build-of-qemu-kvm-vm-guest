@@ -1,0 +1,63 @@
+libvirt_group: libvirt
+user_to_add_to_libvirt_group:
+  - phchoi
+# replace the password when needed
+# probably need ansible-vault or something similar
+default_root_password: abcd1234
+default_ubuntu_password: abcd1234
+default_image: ubuntu-18.04
+gateway_nth_ip: 1
+build_node:
+  br0:
+    bootproto: static
+    ip_address: 192.168.0.99/24
+    dns:
+      - 192.168.0.1
+  nic_to_bind_to_br0: enp4s0
+libvirt_disk_path: /var/lib/libvirt/images
+vm_config:
+  c1r2048d40:
+    vcpu: 1
+    ram: 2048
+    size: 40G
+    bridge: br0
+    type: kvm
+    os_type: linux
+    format: qcow2
+vm_profile:
+  - name: controller-1
+    ip: 192.168.0.111/24
+    config: "{{ vm_config.c1r2048d40 }}"
+    root_password: "{{ default_root_password }}"
+    ubuntu_password: "{{ default_ubuntu_password }}"
+    image: "{{ default_image }}"
+  - name: controller-2
+    ip: 192.168.0.112/24
+    config: "{{ vm_config.c1r2048d40 }}"
+    root_password: "{{ default_root_password }}"
+    ubuntu_password: "{{ default_ubuntu_password }}"
+    image: "{{ default_image }}"
+  - name: controller-3
+    ip: 192.168.0.113/24
+    config: "{{ vm_config.c1r2048d40 }}"
+    root_password: "{{ default_root_password }}"
+    ubuntu_password: "{{ default_ubuntu_password }}"
+    image: "{{ default_image }}"
+  - name: compute-1
+    ip: 192.168.0.121/24
+    config: "{{ vm_config.c1r2048d40 }}"
+    root_password: "{{ default_root_password }}"
+    ubuntu_password: "{{ default_ubuntu_password }}"
+    image: "{{ default_image }}"
+  - name: compute-2
+    ip: 192.168.0.122/24
+    config: "{{ vm_config.c1r2048d40 }}"
+    root_password: "{{ default_root_password }}"
+    ubuntu_password: "{{ default_ubuntu_password }}"
+    image: "{{ default_image }}"
+  - name: compute-3
+    ip: 192.168.0.123/24
+    config: "{{ vm_config.c1r2048d40 }}"
+    root_password: "{{ default_root_password }}"
+    ubuntu_password: "{{ default_ubuntu_password }}"
+    image: "{{ default_image }}"

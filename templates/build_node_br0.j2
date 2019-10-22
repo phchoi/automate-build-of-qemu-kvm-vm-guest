@@ -1,0 +1,22 @@
+DEVICE="br0"
+# I am getting ip from DHCP server #
+{% if bridge.bootproto == 'dhcp' %}
+BOOTPROTO="dhcp"
+{% else %}
+BOOTPROTO="static"
+IPADDR={{ bridge.ip_address | ipaddr('address') }}
+NETMASK={{ bridge.ip_address | ipaddr('netmask') }}
+{% if bridge.gateway is defined %}
+GATEWAY={{ bridge.gateway }}
+{% else %}
+GATEWAY={{ bridge.ip_address | ipaddr('1') | ipaddr('address') }}
+{% endif %}
+{% for dns in bridge.dns %}
+DNS{{ loop.index }}={{ dns }}
+{% endfor %}
+{% endif %}
+IPV6INIT="yes"
+IPV6_AUTOCONF="yes"
+ONBOOT="yes"
+TYPE="Bridge"
+DELAY="0"

@@ -1,0 +1,71 @@
+- hosts: build_node
+  become: true
+  tasks:
+  - name: check vm state
+    shell: virsh domstate {{ item.name }}
+    register: vm_exists
+    with_items: "{{ vm_profile }}"
+    ignore_errors: True
+
+  - debug: msg="{{ item.item}}"
+    when: item.stdout == 'shut off'
+    with_items: "{{ vm_exists.results }}"
+
+  - name: find out which vm exists and need to be started
+    set_fact:
+      start_list: "{{ start_list | default([]) + [item.item] }}"
+    when: item.stdout == 'shut off'
+    with_items: "{{ vm_exists.results }}"
+
+  - name: find out which vm doesn't exist yet
+    set_fact:
+      create_list: "{{ create_list | default([]) + [item.item] }}"
+    when: item.rc != 0
+    with_items: "{{ vm_exists.results }}"
+
+  - name: create temp directory to store config file
+    file:
+      path: "/tmp/{{ item.name }}"
+      state: directory
+    with_items: "{{ create_list }}"
+    when: create_list is defined
+
+  - name: create iface file before creating image
+    template:
+      src: templates/ubuntu_iface.j2
+      dest: "/tmp/{{ item.name }}/01-netcfg.yaml"
+    with_items: "{{ create_list }}"
+    when: create_list is defined
+
+  - name: create vm images
+    shell: >
+      virt-builder {{ item.image }}
+      --format {{ item.config.format }} --size {{ item.config.size }} -o {{ libvirt_disk_path }}/{{ item.name }}.img
+      --copy-in /tmp/{{ item.name }}:/root/ --copy /root/{{ item.name }}/01-netcfg.yaml:/etc/netplan/01-netcfg.yaml
+      --hostname {{ item.name }} 
+      --run-command 'systemctl enable serial-getty@ttyS0.service' 
+      --run-command 'systemctl start serial-getty@ttyS0.service' 
+      --run-command 'useradd ubuntu' --run-command 'usermod -aG sudo ubuntu' 
+      --password ubuntu:password:{{ item.ubuntu_password }} 
+      --root-password password:{{ item.root_password }}
+      --firstboot-command 'dpkg-reconfigure openssh-server'
+    with_items: "{{ create_list }}"
+    when: create_list is defined
+
+  - name: create vm 
+    shell: > 
+      virt-install --connect qemu:///system 
+      --ram {{ item.config.ram }} --vcpu {{ item.config.vcpu }} 
+      --name {{ item.name }} --disk path={{ libvirt_disk_path }}/{{ item.name }}.img
+      --network bridge={{ item.config.bridge }} --os-type={{ item.config.os_type }}
+      --virt-type {{ item.config.type }} --boot hd --noautoconsole
+    with_items: "{{ create_list }}"
+    when: create_list is defined
+
+  - name: start stopped-vm
+    virt: 
+      name: "{{ item.name }}"
+      state: running
+      uri: qemu:///system
+    with_items: "{{ start_list }}"
+    when: start_list is defined
