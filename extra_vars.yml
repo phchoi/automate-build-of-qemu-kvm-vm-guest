@@ -43,19 +43,19 @@ vm_profile:
     root_password: "{{ default_root_password }}"
     ubuntu_password: "{{ default_ubuntu_password }}"
     image: "{{ default_image }}"
-  - name: compute-1
+  - name: worker-1
     ip: 192.168.0.121/24
     config: "{{ vm_config.c1r2048d40 }}"
     root_password: "{{ default_root_password }}"
     ubuntu_password: "{{ default_ubuntu_password }}"
     image: "{{ default_image }}"
-  - name: compute-2
+  - name: worker-2
     ip: 192.168.0.122/24
     config: "{{ vm_config.c1r2048d40 }}"
     root_password: "{{ default_root_password }}"
     ubuntu_password: "{{ default_ubuntu_password }}"
     image: "{{ default_image }}"
-  - name: compute-3
+  - name: worker-3
     ip: 192.168.0.123/24
     config: "{{ vm_config.c1r2048d40 }}"
     root_password: "{{ default_root_password }}"
