@@ -1,0 +1,9 @@
+- hosts: build_node
+  become: true
+  tasks:
+  - name: stop all vm 
+    virt: 
+      name: "{{ item.name }}"
+      state: shutdown 
+      uri: qemu:///system
+    with_items: "{{ vm_profile }}"
