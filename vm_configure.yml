@@ -37,6 +37,8 @@
     with_items: "{{ create_list }}"
     when: create_list is defined
 
+#      --run-command 'sed -i "s/PermitRootLogin\ yes/PermitRootLogin\ no/g" /etc/ssh/sshd_config'
+#      --ssh-inject root:string:{{ ssh_public_key }}
   - name: create vm images
     shell: >
       virt-builder {{ item.image }}
@@ -45,10 +47,12 @@
       --hostname {{ item.name }} 
       --run-command 'systemctl enable serial-getty@ttyS0.service' 
       --run-command 'systemctl start serial-getty@ttyS0.service' 
+      --run-command 'echo "PermitRootLogin yes" >> /etc/ssh/sshd_config'
       --run-command 'useradd ubuntu' --run-command 'usermod -aG sudo ubuntu' 
+      --ssh-inject root:file:{{ ssh_public_key_path }}
       --password ubuntu:password:{{ item.ubuntu_password }} 
       --root-password password:{{ item.root_password }}
-      --firstboot-command 'dpkg-reconfigure openssh-server'
+      --firstboot-command 'ssh-keygen -A'
     with_items: "{{ create_list }}"
     when: create_list is defined
 
