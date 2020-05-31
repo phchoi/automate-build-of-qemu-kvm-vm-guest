@@ -15,7 +15,8 @@ build_node:
       - 192.168.0.1
   nic_to_bind_to_br0: enp4s0
 libvirt_disk_path: /var/lib/libvirt/images
-ssh_public_key_path: '/tmp/.ssh/id_rsa.pub'
+ssh_public_key_path: '/home/phchoi/.ssh/id_rsa.pub'
+#ssh_public_key_path: '/tmp/.ssh/id_rsa.pub'
 vm_config:
   c1r2048d40:
     vcpu: 1
