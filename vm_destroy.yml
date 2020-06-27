@@ -1,0 +1,15 @@
+- hosts: build_node
+  become: true
+  tasks:
+  - name: destroy all vm 
+    virt: 
+      name: "{{ item.name }}"
+      state: destroyed
+      uri: qemu:///system
+    with_items: "{{ vm_profile }}"
+
+  - name: destroy all virtual disk
+    file:
+      path: "{{ libvirt_disk_path }}/{{ item.name }}.img"
+      state: absent
+    with_items: "{{ vm_profile }}"
