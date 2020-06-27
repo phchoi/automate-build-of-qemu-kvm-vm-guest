@@ -8,6 +8,13 @@
       uri: qemu:///system
     with_items: "{{ vm_profile }}"
 
+  - name: undefine all vm 
+    virt: 
+      name: "{{ item.name }}"
+      command: undefine
+      uri: qemu:///system
+    with_items: "{{ vm_profile }}"
+
   - name: destroy all virtual disk
     file:
       path: "{{ libvirt_disk_path }}/{{ item.name }}.img"
