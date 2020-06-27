@@ -49,7 +49,11 @@
       --run-command 'systemctl start serial-getty@ttyS0.service' 
       --run-command 'echo "PermitRootLogin yes" >> /etc/ssh/sshd_config'
       --run-command 'useradd ubuntu' --run-command 'usermod -aG sudo ubuntu' 
+      --run-command 'mkdir -p /home/ubuntu/.ssh' --run-command 'chown -R ubuntu:ubuntu /home/ubuntu'
+      --run-command 'chmod -R 750 /home/ubuntu/.ssh'
+      --run-command 'echo "ubuntu ALL=(ALL)       NOPASSWD:ALL" >> /etc/sudoers.d/ubutnu'
       --ssh-inject root:file:{{ ssh_public_key_path }}
+      --ssh-inject ubuntu:file:{{ ssh_public_key_path }}
       --password ubuntu:password:{{ item.ubuntu_password }} 
       --root-password password:{{ item.root_password }}
       --firstboot-command 'ssh-keygen -A'

@@ -18,6 +18,14 @@ libvirt_disk_path: /var/lib/libvirt/images
 ssh_public_key_path: '/home/phchoi/.ssh/id_rsa.pub'
 #ssh_public_key_path: '/tmp/.ssh/id_rsa.pub'
 vm_config:
+  c1r512d40:
+    vcpu: 1
+    ram: 512
+    size: 40G
+    bridge: br0
+    type: kvm
+    os_type: linux
+    format: qcow2
   c1r2048d40:
     vcpu: 1
     ram: 2048
@@ -60,6 +68,12 @@ vm_profile:
   - name: worker-3
     ip: 192.168.0.123/24
     config: "{{ vm_config.c1r2048d40 }}"
+    root_password: "{{ default_root_password }}"
+    ubuntu_password: "{{ default_ubuntu_password }}"
+    image: "{{ default_image }}"
+  - name: lb-1
+    ip: 192.168.0.101/24
+    config: "{{ vm_config.c1r512d40 }}"
     root_password: "{{ default_root_password }}"
     ubuntu_password: "{{ default_ubuntu_password }}"
     image: "{{ default_image }}"
